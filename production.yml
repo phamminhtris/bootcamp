@@ -14,17 +14,21 @@ services:
     depends_on:
       - postgres
       - redis
-    command: daphne -b 0.0.0.0 -p 8000 config.asgi:application
+    command: 
+      - python manage.py migrate
+      - daphne -b 0.0.0.0 -p 8000 config.asgi:application # only use daphne to serve both ws and http
+    expose:
+      - 8000
 
-  worker:
-    build:
-      context: .
-      dockerfile: ./compose/production/django/Dockerfile
-    command: python manage.py runworker
-    env_file: .env
-    depends_on:
-      - postgres
-      - redis
+  # worker:
+  #   build:
+  #     context: .
+  #     dockerfile: ./compose/production/django/Dockerfile
+  #   command: python manage.py runworker
+  #   env_file: .env
+  #   depends_on:
+  #     - postgres
+  #     - redis
 
   postgres:
     build:
@@ -33,19 +37,30 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - postgres_backup:/backups
+    env_file: .env
 
-  caddy:
+  nginx:
     build:
       context: .
-      dockerfile: ./compose/production/caddy/Dockerfile
+      dockerfile: ./compose/production/nginx/Dockerfile
     depends_on:
       - django
-    volumes:
-      - caddy:/root/.caddy
-    env_file: .env
     ports:
       - "0.0.0.0:80:80"
       - "0.0.0.0:443:443"
+      
+  # caddy:
+  #   build:
+  #     context: .
+  #     dockerfile: ./compose/production/caddy/Dockerfile
+  #   depends_on:
+  #     - django
+  #   volumes:
+  #     - caddy:/root/.caddy
+  #   env_file: .env
+  #   ports:
+  #     - "0.0.0.0:80:80"
+  #     - "0.0.0.0:443:443"
 
   redis:
     image: redis:4.0

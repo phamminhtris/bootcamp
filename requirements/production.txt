@@ -10,3 +10,6 @@ raven>=6.6.0  # https://github.com/getsentry/raven-python
 # ------------------------------------------------------------------------------
 django-anymail>=2.0  # https://github.com/anymail/django-anymail
 django-storages>=1.6.5  # https://github.com/jschneier/django-storages
+
+# This is bad but will try to fix it later
+# django-debug-toolbar>=1.9.1
